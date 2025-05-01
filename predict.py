@@ -31,7 +31,7 @@ if __name__ == "__main__":
     #   count、name_classes仅在mode='predict'时有效
     #-------------------------------------------------------------------------#
     count           = False
-    name_classes = ['brackground', 'crack', 'pothole', 'patch']
+    name_classes = ['brackground', 'crack', 'pothole','patch']
     # name_classes    = ["background","aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
     # name_classes    = ["background","cat","dog"]
     #----------------------------------------------------------------------------------------------------------#
@@ -85,10 +85,9 @@ if __name__ == "__main__":
             seg_img[:, :, 2] += ((pr == c)*( self.colors[c][2] )).astype('uint8')
         '''
         while True:
-            image_path = input('Input image filename:')
+            img = input('Input image filename:')
             try:
-                image = cv2.imread(img_path)
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                image = Image.open(img)
             except:
                 print('Open Error! Try again!')
                 continue
