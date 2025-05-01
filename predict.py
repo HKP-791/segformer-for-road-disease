@@ -31,7 +31,8 @@ if __name__ == "__main__":
     #   count、name_classes仅在mode='predict'时有效
     #-------------------------------------------------------------------------#
     count           = False
-    name_classes    = ["background","aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+    name_classes = ['brackground', 'crack', 'pothole', 'patch']
+    # name_classes    = ["background","aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
     # name_classes    = ["background","cat","dog"]
     #----------------------------------------------------------------------------------------------------------#
     #   video_path          用于指定视频的路径，当video_path=0时表示检测摄像头
@@ -84,9 +85,10 @@ if __name__ == "__main__":
             seg_img[:, :, 2] += ((pr == c)*( self.colors[c][2] )).astype('uint8')
         '''
         while True:
-            img = input('Input image filename:')
+            image_path = input('Input image filename:')
             try:
-                image = Image.open(img)
+                image = cv2.imread(img_path)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             except:
                 print('Open Error! Try again!')
                 continue
