@@ -7,6 +7,7 @@ import time
 import cv2
 import numpy as np
 from PIL import Image
+import os
 
 from segformer import SegFormer_Segmentation
 
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     #   count、name_classes仅在mode='predict'时有效
     #-------------------------------------------------------------------------#
     count           = False
-    name_classes = ['brackground', 'crack', 'pothole','patch']
+    name_classes    = ["background","crack","pothole", 'patch']
     # name_classes    = ["background","aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
     # name_classes    = ["background","cat","dog"]
     #----------------------------------------------------------------------------------------------------------#
