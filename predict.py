@@ -10,6 +10,7 @@ from PIL import Image
 import os
 
 from segformer import SegFormer_Segmentation
+from utils.value import *
 
 if __name__ == "__main__":
     #-------------------------------------------------------------------------#
@@ -24,7 +25,7 @@ if __name__ == "__main__":
     #   'dir_predict'       表示遍历文件夹进行检测并保存。默认遍历img文件夹，保存img_out文件夹，详情查看下方注释。
     #   'export_onnx'       表示将模型导出为onnx，需要pytorch1.7.1以上。
     #----------------------------------------------------------------------------------------------------------#
-    mode = "predict"
+    mode = "batch predict"
     #-------------------------------------------------------------------------#
     #   count               指定了是否进行目标的像素点计数（即面积）与比例计算
     #   name_classes        区分的种类，和json_to_dataset里面的一样，用于打印种类和数量
@@ -71,7 +72,13 @@ if __name__ == "__main__":
     simplify        = True
     onnx_save_path  = "model_data/models.onnx"
 
-    if mode == "predict":
+    img_dir = r'X:\segformer-pytorch-master\VOCdevkit\VOC2007\JPEGImages'
+    label_dir =  r'X:\segformer-pytorch-master\VOCdevkit\VOC2007\SegmentationClass'
+    test_output = r'X:\segformer-pytorch-master\pred_result\RDD2022'
+    list_path = r'X:\segformer-pytorch-master\VOCdevkit\VOC2007\ImageSets\Segmentation\val.txt'
+
+
+    if mode == "single predict":
         '''
         predict.py有几个注意点
         1、该代码无法直接进行批量预测，如果想要批量预测，可以利用os.listdir()遍历文件夹，利用Image.open打开图片文件进行预测。
@@ -95,6 +102,47 @@ if __name__ == "__main__":
             else:
                 r_image = segformer.detect_image(image, count=count, name_classes=name_classes)
                 r_image.show()
+
+    elif mode == 'batch predict':
+        with open(list_path, 'r', encoding='utf-8') as file:
+            idx = 1
+            metric_list = []
+            for line in file.readlines():
+                line = line.strip()
+                image_path = os.path.join(img_dir, f'{line}.jpg')
+                label_path = os.path.join(label_dir, f'{line}.png')
+                image = Image.open(image_path)
+                label = Image.open(label_path)
+                prediction = segformer.get_miou_png(image)
+                metric_i = []
+                for i in range(1, 4):
+                    # prediction = erode_mask(prediction)
+                    result = calculate_metric_percase(prediction, np.array(label), i)
+                    if result is not None:
+                        metric_i.append(result)
+                print(f'idx {idx} case {line} mean_dice {np.mean(metric_i, axis=0)[0]} mean_hd95 {np.mean(metric_i, axis=0)[1]} iou {np.mean(metric_i, axis=0)[2]} mAP@{np.mean(metric_i, axis=0)[3]} {np.mean(metric_i, axis=0)[4]} mAP@0.5:0.95 {np.mean(metric_i, axis=0)[5]}')
+                idx += 1
+                for item in metric_i:
+                    metric_list.append(item)
+
+                image = np.array(image)
+                label = np.array(label)
+                sample = {'image':image, 'pred':prediction, 'label':label}
+                output_file = os.path.join(test_output, f'{line}.npz')
+                np.savez(output_file, **sample)
+
+        metric_arr = np.array(metric_list)
+        for i in range(1, 4):
+            rows_with_label = metric_arr[metric_arr[:, -1] == i]
+            mean_result = np.mean(rows_with_label, axis=0)
+            print(f'Mean class {i} mean_dice {mean_result[0]} mean_hd95{mean_result[1]} iou {mean_result[2]} map@{mean_result[3]} {mean_result[4]} map@0.5:0.95 {mean_result[5]}')
+        performance = np.mean(metric_list, axis=0)[0]
+        mean_hd95 = np.mean(metric_list, axis=0)[1]
+        iou = np.mean(metric_list, axis=0)[2]
+        mAP = np.mean(metric_list, axis=0)[4]
+        print(f'Testing performance in best val model: mean_dice : {performance} mean_hd95 : {mean_hd95} iou : {iou} mAP@{np.mean(metric_i, axis=0)[3]} {mAP} mAP@0.5:0.95 {np.mean(metric_list, axis=0)[5]}')
+        print("Testing Finished!")
+
 
     elif mode == "video":
         capture=cv2.VideoCapture(video_path)

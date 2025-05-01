@@ -182,7 +182,7 @@ class SegFormer_Segmentation(object):
             #------------------------------------------------#
             #   将新图与原图及进行混合
             #------------------------------------------------#
-            image   = Image.blend(old_img, image, 0.7)
+            image   = Image.blend(old_img, image, 0.2)
 
         elif self.mix_type == 1:
             # seg_img = np.zeros((np.shape(pr)[0], np.shape(pr)[1], 3))
@@ -343,5 +343,4 @@ class SegFormer_Segmentation(object):
             #---------------------------------------------------#
             pr = pr.argmax(axis=-1)
     
-        image = Image.fromarray(np.uint8(pr))
-        return image
+        return pr
