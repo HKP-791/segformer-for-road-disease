@@ -10,6 +10,8 @@ model_data/
 .temp_miou_out/
 pred_result/
 img/
+/draft.py
+.gitignore
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
