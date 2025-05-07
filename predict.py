@@ -1,97 +1,135 @@
-#----------------------------------------------------#
-#   将单张图片预测、摄像头检测和FPS测试功能
-#   整合到了一个py文件中，通过指定mode进行模式的修改。
-#----------------------------------------------------#
 import time
 
 import cv2
 import numpy as np
 from PIL import Image
 import os
+import argparse
 
 from segformer import SegFormer_Segmentation
 from utils.value import *
 
-if __name__ == "__main__":
-    #-------------------------------------------------------------------------#
-    #   如果想要修改对应种类的颜色，到generate函数里修改self.colors即可
-    #-------------------------------------------------------------------------#
-    segformer = SegFormer_Segmentation()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
     #----------------------------------------------------------------------------------------------------------#
     #   mode用于指定测试的模式：
-    #   'predict'           表示单张图片预测，如果想对预测过程进行修改，如保存图片，截取对象等，可以先看下方详细的注释
+    #   'single_predict'    表示单张图片预测，如果想对预测过程进行修改，如保存图片，截取对象等，可以先看下方详细的注释
+    #   'batch_predict'     表示批量图片预测，输出分割指标dice、hd95，检测指标mIou、mAP@0.5、mAP@0.5:0.95
     #   'video'             表示视频检测，可调用摄像头或者视频进行检测，详情查看下方注释。
     #   'fps'               表示测试fps，使用的图片是img里面的street.jpg，详情查看下方注释。
     #   'dir_predict'       表示遍历文件夹进行检测并保存。默认遍历img文件夹，保存img_out文件夹，详情查看下方注释。
     #   'export_onnx'       表示将模型导出为onnx，需要pytorch1.7.1以上。
     #----------------------------------------------------------------------------------------------------------#
-    mode = "batch predict"
+    parser.add_argument('--mode', type=str, default='batch_predict', help='test mode')
     #-------------------------------------------------------------------------#
     #   count               指定了是否进行目标的像素点计数（即面积）与比例计算
     #   name_classes        区分的种类，和json_to_dataset里面的一样，用于打印种类和数量
     #
     #   count、name_classes仅在mode='predict'时有效
     #-------------------------------------------------------------------------#
-    count           = False
-    name_classes    = ["background","crack","pothole", 'patch']
-    # name_classes    = ["background","aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
-    # name_classes    = ["background","cat","dog"]
+    parser.add_argument('--count', type=bool, default=False, help='count pixel')
     #----------------------------------------------------------------------------------------------------------#
     #   video_path          用于指定视频的路径，当video_path=0时表示检测摄像头
-    #                       想要检测视频，则设置如video_path = "xxx.mp4"即可，代表读取出根目录下的xxx.mp4文件。
-    #   video_save_path     表示视频保存的路径，当video_save_path=""时表示不保存
-    #                       想要保存视频，则设置如video_save_path = "yyy.mp4"即可，代表保存为根目录下的yyy.mp4文件。
+    #                       想要检测视频，则设置如video_path = 'xxx.mp4'即可，代表读取出根目录下的xxx.mp4文件。
+    #----------------------------------------------------------------------------------------------------------#
+    parser.add_argument('--video_path', type=str, default='0', help='video_path')
+    #----------------------------------------------------------------------------------------------------------#
+    #   video_save_path     表示视频保存的路径，当video_save_path=''时表示不保存
+    #                       想要保存视频，则设置如video_save_path = 'yyy.mp4'即可，代表保存为根目录下的yyy.mp4文件。
+    #----------------------------------------------------------------------------------------------------------#
+    parser.add_argument('--video_save_path', type=str, default='', help='video_save_path')
+    #----------------------------------------------------------------------------------------------------------#
     #   video_fps           用于保存的视频的fps
     #
     #   video_path、video_save_path和video_fps仅在mode='video'时有效
     #   保存视频时需要ctrl+c退出或者运行到最后一帧才会完成完整的保存步骤。
     #----------------------------------------------------------------------------------------------------------#
-    video_path      = 0
-    video_save_path = ""
-    video_fps       = 25.0
+    parser.add_argument('--video_fps', type=int, default=25, help='video_fps')
     #----------------------------------------------------------------------------------------------------------#
     #   test_interval       用于指定测量fps的时候，图片检测的次数。理论上test_interval越大，fps越准确。
+    #----------------------------------------------------------------------------------------------------------#
+    parser.add_argument('--test_interval', type=int, default=100, help='test_interval')
+    #----------------------------------------------------------------------------------------------------------#
     #   fps_image_path      用于指定测试的fps图片
     #   
     #   test_interval和fps_image_path仅在mode='fps'有效
     #----------------------------------------------------------------------------------------------------------#
-    test_interval = 100
-    fps_image_path  = "img/street.jpg"
+    parser.add_argument('--fps_image_path', type=str, default='img/street.jpg', help='fps_image_path')
     #-------------------------------------------------------------------------#
-    #   dir_origin_path     指定了用于检测的图片的文件夹路径
     #   dir_save_path       指定了检测完图片的保存路径
     #   
     #   dir_origin_path和dir_save_path仅在mode='dir_predict'时有效
     #-------------------------------------------------------------------------#
-    dir_origin_path = "img/"
-    dir_save_path   = "img_out/"
+    parser.add_argument('--dir_save_path', type=str, default='img_out/', help='dir_save_path')
     #-------------------------------------------------------------------------#
     #   simplify            使用Simplify onnx
+    #-------------------------------------------------------------------------#
+    parser.add_argument('--simplify', type=bool, default=True, help='simplify onnx')
+    #-------------------------------------------------------------------------#
     #   onnx_save_path      指定了onnx的保存路径
     #-------------------------------------------------------------------------#
-    simplify        = True
-    onnx_save_path  = "model_data/models.onnx"
+    parser.add_argument('--onnx_save_path', type=str, default='model_data/segformer.onnx', help='onnx_save_path')
+    #-------------------------------------------------------------------------#
+    #   img_dir      储存测试照片文件的地址
+    #-------------------------------------------------------------------------#
+    parser.add_argument('--img_dir', type=str, default='X:/segformer-pytorch-master/road_dataset/JPEGImages', help='img_dir') 
+    #-------------------------------------------------------------------------#
+    #   label_dir      储存掩码标签的地址
+    #-------------------------------------------------------------------------#
+    parser.add_argument('--label_dir', type=str, default='X:/segformer-pytorch-master/road_dataset/SegmentationClass', help='label_dir')
+    #-------------------------------------------------------------------------#
+    #   test_output    输出测试结果的文件地址
+    #-------------------------------------------------------------------------#
+    parser.add_argument('--test_output', type=str, default='X:/segformer-pytorch-master/pred_result/RDD2022', help='test_output')
+    #-------------------------------------------------------------------------#
+    #   list_path      储存文件索引内容的txt地址
+    #-------------------------------------------------------------------------#
+    parser.add_argument('--list_path', type=str, default='X:/segformer-pytorch-master/road_dataset/ImageSets/Segmentation/val.txt', help='list_path')
+    #-------------------------------------------------------------------------#
+    #   model_path指向logs文件夹下的权值文件
+    #-------------------------------------------------------------------------#
+    parser.add_argument('--model_path', type=str, default='X:/segformer-pytorch-master/model_data/2/best_epoch_weights.pth', help='model_path')
+    #-------------------------------------------------------------------------#
+    #   所需要区分的类的个数+1
+    #-------------------------------------------------------------------------#
+    parser.add_argument('--num_classes', type=int, default=4, help='num_classes')
+    #-------------------------------------------------------------------------#
+    #   所使用的的主干网络：
+    #   b0、b1、b2、b3、b4、b5
+    #-------------------------------------------------------------------------#
+    parser.add_argument('--phi', type=str, default='b2', help='phi')
+    #-------------------------------------------------------------------------#
+    #   mix_type参数用于控制检测结果的可视化方式
+    #   mix_type = 0的时候代表原图与生成的图进行混合
+    #   mix_type = 1的时候代表仅保留生成的图
+    #   mix_type = 2的时候代表仅扣去背景，仅保留原图中的目标
+    #-------------------------------------------------------------------------#
+    parser.add_argument('--mix_type', type=int, default=0, help='mix_type')
 
-    img_dir = r'X:\segformer-pytorch-master\VOCdevkit\VOC2007\JPEGImages'
-    label_dir =  r'X:\segformer-pytorch-master\VOCdevkit\VOC2007\SegmentationClass'
-    test_output = r'X:\segformer-pytorch-master\pred_result\RDD2022'
-    list_path = r'X:\segformer-pytorch-master\VOCdevkit\VOC2007\ImageSets\Segmentation\val.txt'
+    args = parser.parse_args()
+    mode = args.mode
+    count = args.count
+    video_path = args.video_path
+    video_save_path = args.video_save_path
+    video_fps = args.video_fps
+    test_interval = args.test_interval
+    fps_image_path = args.fps_image_path
+    dir_save_path = args.dir_save_path
+    simplify = args.simplify
+    onnx_save_path = args.onnx_save_path
+    img_dir = args.img_dir
+    label_dir = args.label_dir
+    test_output = args.test_output
+    list_path = args.list_path
+    model_path = args.model_path
+    num_classes = args.num_classes
+    phi = args.phi
+    mix_type = args.mix_type
 
+    name_classes = ['background', 'crack', 'pothole', 'patch']
+    segformer = SegFormer_Segmentation(model_path=model_path, num_classes=num_classes, phi=phi, mix_type=mix_type)
 
-    if mode == "single predict":
-        '''
-        predict.py有几个注意点
-        1、该代码无法直接进行批量预测，如果想要批量预测，可以利用os.listdir()遍历文件夹，利用Image.open打开图片文件进行预测。
-        具体流程可以参考get_miou_prediction.py，在get_miou_prediction.py即实现了遍历。
-        2、如果想要保存，利用r_image.save("img.jpg")即可保存。
-        3、如果想要原图和分割图不混合，可以把blend参数设置成False。
-        4、如果想根据mask获取对应的区域，可以参考detect_image函数中，利用预测结果绘图的部分，判断每一个像素点的种类，然后根据种类获取对应的部分。
-        seg_img = np.zeros((np.shape(pr)[0],np.shape(pr)[1],3))
-        for c in range(self.num_classes):
-            seg_img[:, :, 0] += ((pr == c)*( self.colors[c][0] )).astype('uint8')
-            seg_img[:, :, 1] += ((pr == c)*( self.colors[c][1] )).astype('uint8')
-            seg_img[:, :, 2] += ((pr == c)*( self.colors[c][2] )).astype('uint8')
-        '''
+    if mode == 'single_predict':
         while True:
             img = input('Input image filename:')
             try:
@@ -103,7 +141,7 @@ if __name__ == "__main__":
                 r_image = segformer.detect_image(image, count=count, name_classes=name_classes)
                 r_image.show()
 
-    elif mode == 'batch predict':
+    elif mode == 'batch_predict':
         with open(list_path, 'r', encoding='utf-8') as file:
             idx = 1
             metric_list = []
@@ -141,19 +179,18 @@ if __name__ == "__main__":
         iou = np.mean(metric_list, axis=0)[2]
         mAP = np.mean(metric_list, axis=0)[4]
         print(f'Testing performance in best val model: mean_dice : {performance} mean_hd95 : {mean_hd95} iou : {iou} mAP@{np.mean(metric_i, axis=0)[3]} {mAP} mAP@0.5:0.95 {np.mean(metric_list, axis=0)[5]}')
-        print("Testing Finished!")
+        print('Testing Finished!')
 
-
-    elif mode == "video":
+    elif mode == 'video':
         capture=cv2.VideoCapture(video_path)
-        if video_save_path!="":
+        if video_save_path!='':
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
             size = (int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
             out = cv2.VideoWriter(video_save_path, fourcc, video_fps, size)
 
         ref, frame = capture.read()
         if not ref:
-            raise ValueError("未能正确读取摄像头（视频），请注意是否正确安装摄像头（是否正确填写视频路径）。")
+            raise ValueError('未能正确读取摄像头（视频），请注意是否正确安装摄像头（是否正确填写视频路径）。')
 
         fps = 0.0
         while(True):
@@ -172,45 +209,31 @@ if __name__ == "__main__":
             frame = cv2.cvtColor(frame,cv2.COLOR_RGB2BGR)
             
             fps  = ( fps + (1./(time.time()-t1)) ) / 2
-            print("fps= %.2f"%(fps))
-            frame = cv2.putText(frame, "fps= %.2f"%(fps), (0, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            print('fps= %.2f'%(fps))
+            frame = cv2.putText(frame, 'fps= %.2f'%(fps), (0, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             
-            cv2.imshow("video",frame)
+            cv2.imshow('video',frame)
             c= cv2.waitKey(1) & 0xff 
-            if video_save_path!="":
+            if video_save_path!='':
                 out.write(frame)
 
             if c==27:
                 capture.release()
                 break
-        print("Video Detection Done!")
+        print('Video Detection Done!')
         capture.release()
-        if video_save_path!="":
-            print("Save processed video to the path :" + video_save_path)
+        if video_save_path!='':
+            print('Save processed video to the path :' + video_save_path)
             out.release()
         cv2.destroyAllWindows()
 
-    elif mode == "fps":
+    elif mode == 'fps':
         img = Image.open(fps_image_path)
         tact_time = segformer.get_FPS(img, test_interval)
         print(str(tact_time) + ' seconds, ' + str(1/tact_time) + 'FPS, @batch_size 1')
         
-    elif mode == "dir_predict":
-        import os
-        from tqdm import tqdm
-
-        img_names = os.listdir(dir_origin_path)
-        for img_name in tqdm(img_names):
-            if img_name.lower().endswith(('.bmp', '.dib', '.png', '.jpg', '.jpeg', '.pbm', '.pgm', '.ppm', '.tif', '.tiff')):
-                image_path  = os.path.join(dir_origin_path, img_name)
-                image       = Image.open(image_path)
-                r_image     = segformer.detect_image(image)
-                if not os.path.exists(dir_save_path):
-                    os.makedirs(dir_save_path)
-                r_image.save(os.path.join(dir_save_path, img_name))
-                
-    elif mode == "export_onnx":
+    elif mode == 'export_onnx':
         segformer.convert_to_onnx(simplify, onnx_save_path)
         
     else:
-        raise AssertionError("Please specify the correct mode: 'predict', 'video', 'fps' or 'dir_predict'.")
+        raise AssertionError('Please specify the correct mode: single_predict, batch_predict, video or fps')

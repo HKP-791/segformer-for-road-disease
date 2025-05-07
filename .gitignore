@@ -10,6 +10,8 @@ model_data/
 .temp_miou_out/
 pred_result/
 img/
+road_dataset/
+materials/
 draft.py
 .gitignore
 

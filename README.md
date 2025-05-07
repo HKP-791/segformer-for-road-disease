@@ -36,7 +36,7 @@ cd Segformer_for_road_disease
 pip install -r requirements.txt
 ```
 ### 2.2 数据准备
-- 模型输入的照片格式要求为`.jpg`格式，掩码标签格式要求为`.png`格式，照片和标签要分别放置于两个文件夹内。训练和测试需要的目标文件名称请放置于`train.txt`和`val.txt`文件中，训练和测试时模型会从txt中索引目标文件进行训练和测试。
+- 模型输入的照片格式要求为`.jpg`格式，掩码标签格式要求为`.png`格式，照片和标签要分别放置于`road_dataset/JPEGImages`和`road_dataset/SegmentationClass`两个文件夹内。训练和测试需要的目标文件名索引称写于`train.txt`和`val.txt`文件中，索引文件请放置于`road_dataset/ImageSets`目录下，训练和测试时模型会从txt中索引目标文件进行训练和测试。
 - 图像数据为RGB三通道格式，标签数据为单通道的灰度图，背景像素定义为0，目标像素值依类别定义为标签数字值。
 - 图像大小尺寸无要求。
 - 我们提供了代码帮助制作训练和测试所需的数据集，内容请参考`./preprocess_dataset.py`。
@@ -44,20 +44,14 @@ pip install -r requirements.txt
 将准备好的训练数据集和索引.txt文件放于项目根目录下，预训练模型权重要放置于目录`./checkpoints`下。输入下面的命令进行训练
 
 ```bash
-python train.py --warmup --AdamW --root_path <Your training data path> --list_dir <Your list for training indexes> --output <Your output path> 
+python train.py --Init_lr <base learning rate> --Unfreeze_Epoch <epoch for unfreeze training> --dataset_path <path to your dataset>  --model_path <path where your model are> 
 ```
 ### 2.4 测试
-模型测试支持单张测试、批次测试和视频测试。将训练好的模型文件放置于模型储存目录`./checkpoints`下，在终端中输入以下指令进行单张测试
+模型测试支持单张测试、批次测试和视频测试。将训练好的模型文件放置于模型储存目录`./checkpoints`下，在终端中输入以下指令进行测试
 ```bash
-python test.py --is_savenii --volume_path <Your test dataset path> --output_dir <Your test output directory> --lora_ckpt <path where your LoRA model checkpoints are>
+python prediction.py --mode <test mode>--img_path <Your img dir> --label_dir <Your label dir> --list_dir <Your index list dir> --test_output <test output path> --phi <type of your model> --model_path <path where your model checkpoints are> --num_classes <number of classes>
 ```
-输入下面指令进行批次测试
-```bash
-python test.py --is_savenii --volume_path <Your test dataset path> --output_dir <Your test output directory> --lora_ckpt <path where your LoRA model checkpoints are> --module sam_lora_image_encoder_mask_decoder
-```
-输入下面指令进行视频测试
-```bash
-```
+我们提供了4种测试模式，分别是单张测试、批量测试、视频测试、fps测试。其对应的命令为`--mode single_predict`、`--mode batch_predict`、`--mode video`、`--mode fps`
 
 ## 3.分割模型在目标检测任务上的尝试
 

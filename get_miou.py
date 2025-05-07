@@ -6,11 +6,7 @@ from tqdm import tqdm
 from segformer import SegFormer_Segmentation
 from utils.utils_metrics import compute_mIoU, show_results
 
-'''
-进行指标评估需要注意以下几点：
-1、该文件生成的图为灰度图，因为值比较小，按照PNG形式的图看是没有显示效果的，所以看到近似全黑的图是正常的。
-2、该文件计算的是验证集的miou，当前该库将测试集当作验证集使用，不单独划分测试集
-'''
+
 if __name__ == "__main__":
     #---------------------------------------------------------------------------#
     #   miou_mode用于指定该文件运行时计算的内容
