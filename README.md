@@ -77,7 +77,7 @@ python prediction.py --mode <test mode>--img_path <Your img dir> --label_dir <Yo
 | Patch | **0.618** | 64.519 | **0.605** | **0.673** | **0.447** |
 | Average | 0.576 | 79.361 | 0.456 | 0.462 | 0.247|
 
-<img src="materials\sample.png">
+<img src="materials\samples.png">
 
 ### 4.作者
 
