@@ -63,10 +63,10 @@ python prediction.py --mode <test mode>--img_path <Your img dir> --label_dir <Yo
   
 | Disease category | mean_dice | mean_HD95 | mean_IOU | mAP@0.5 | mAP@0.5:0.95 |
 |-|-|-|-|-|-|
-| Crack | 0.334 | 106.849 | 0.215 | 0.117 | 0.054 |
-| Pothole | 0.164 | **21.487** | 0.145 | 0.161 | 0.054 |
-| Patch | **0.339** | 89.170 | **0.313** | **0.289** | **0.154** |
-|Average | 0.334 | 99.082 | 0.229 | 0.151 | 0.072 |
+| Crack | 0.597 | 100.270 | 0.340 | 0.246 | 0.092 |
+| Pothole | 0.687 | **33.809** | 0.488 | 0.640 | 0.261 |
+| Patch | **0.727** | 42.582 | **0.613** | **0.680** | **0.440** |
+|Average | 0.623 | 87.696 | 0.393 | 0.337 | 0.159 |
 
 - Segformer_for_road_disease_b5版本：
   
@@ -76,6 +76,8 @@ python prediction.py --mode <test mode>--img_path <Your img dir> --label_dir <Yo
 | Pothole | 0.327 | **23.465** | 0.296 | 0.429 | 0.193 |
 | Patch | **0.618** | 64.519 | **0.605** | **0.673** | **0.447** |
 | Average | 0.576 | 79.361 | 0.456 | 0.462 | 0.247|
+
+<img src="materials\sample.png">
 
 ### 4.作者
 

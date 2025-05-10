@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-data_dir = 'X:\segformer-pytorch-master\pred_result\RDD2022\crack0902.npz'
+data_dir = 'X:\segformer-pytorch-master\pred_result\RDD2022\crack0400.npz'
 data = np.load(data_dir)
 img = cv2.cvtColor(data['image'], cv2.COLOR_RGB2BGR)
 # pred = cv2.cvtColor(data['pred'], cv2.COLOR_RGB2GRAY)

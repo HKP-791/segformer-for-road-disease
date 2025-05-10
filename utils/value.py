@@ -225,12 +225,18 @@ def dilated_mask(predtion):
     return dilated_predition
 
 def erode_mask(predtion):
+    # k = np.array(
+    #     [[1, 1, 1, 1, 1],
+    #      [1, 1, 1, 1, 1],
+    #      [1, 1, 1, 1, 1],
+    #      [1, 1, 1, 1, 1],
+    #      [1, 1, 1, 1, 1]], dtype=np.uint8)
     k = np.array(
-        [[0, 0, 0, 0, 0],
+        [[0, 0, 1, 0, 0],
+         [0, 0, 1, 0, 0],
          [1, 1, 1, 1, 1],
-         [1, 1, 1, 1, 1],
-         [1, 1, 1, 1, 1],
-         [0, 0, 0, 0, 0]], dtype=np.uint8)
+         [0, 0, 1, 0, 0],
+         [0, 0, 1, 0, 0]], dtype=np.uint8)
     # k = np.array(
     #     [[1, 0, 0, 0, 1],
     #      [0, 1, 0, 1, 0],

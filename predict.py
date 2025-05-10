@@ -86,9 +86,9 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------------#
     parser.add_argument('--list_path', type=str, default='X:/segformer-pytorch-master/road_dataset/ImageSets/Segmentation/val.txt', help='list_path')
     #-------------------------------------------------------------------------#
-    #   model_path指向logs文件夹下的权值文件
+    #   model_path指向model_data文件夹下的权值文件
     #-------------------------------------------------------------------------#
-    parser.add_argument('--model_path', type=str, default='X:/segformer-pytorch-master/model_data/2/best_epoch_weights.pth', help='model_path')
+    parser.add_argument('--model_path', type=str, default=r'X:\segformer-pytorch-master\model_data\4\best_epoch_weights.pth', help='model_path')
     #-------------------------------------------------------------------------#
     #   所需要区分的类的个数+1
     #-------------------------------------------------------------------------#
@@ -154,7 +154,7 @@ if __name__ == '__main__':
                 prediction = segformer.get_miou_png(image)
                 metric_i = []
                 for i in range(1, 4):
-                    # prediction = erode_mask(prediction)
+                    prediction = erode_mask(prediction)
                     result = calculate_metric_percase(prediction, np.array(label), i)
                     if result is not None:
                         metric_i.append(result)
