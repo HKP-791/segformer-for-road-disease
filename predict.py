@@ -72,11 +72,11 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------------#
     #   img_dir      储存测试照片文件的地址
     #-------------------------------------------------------------------------#
-    parser.add_argument('--img_dir', type=str, default='X:/segformer-pytorch-master/road_dataset/JPEGImages', help='img_dir') 
+    parser.add_argument('--img_dir', type=str, default='X:\segformer-pytorch-master\datasets\RDD_dataset\JPEGImages', help='img_dir') 
     #-------------------------------------------------------------------------#
     #   label_dir      储存掩码标签的地址
     #-------------------------------------------------------------------------#
-    parser.add_argument('--label_dir', type=str, default='X:/segformer-pytorch-master/road_dataset/SegmentationClass', help='label_dir')
+    parser.add_argument('--label_dir', type=str, default='X:\segformer-pytorch-master\datasets\RDD_dataset\SegmentationClass', help='label_dir')
     #-------------------------------------------------------------------------#
     #   test_output    输出测试结果的文件地址
     #-------------------------------------------------------------------------#
@@ -84,11 +84,11 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------------#
     #   list_path      储存文件索引内容的txt地址
     #-------------------------------------------------------------------------#
-    parser.add_argument('--list_path', type=str, default='X:/segformer-pytorch-master/road_dataset/ImageSets/Segmentation/val.txt', help='list_path')
+    parser.add_argument('--list_path', type=str, default=r'X:\segformer-pytorch-master\datasets\RDD_dataset\list\val.txt', help='list_path')
     #-------------------------------------------------------------------------#
     #   model_path指向model_data文件夹下的权值文件
     #-------------------------------------------------------------------------#
-    parser.add_argument('--model_path', type=str, default=r'X:\segformer-pytorch-master\model_data\4\best_epoch_weights.pth', help='model_path')
+    parser.add_argument('--model_path', type=str, default=r'X:\segformer-pytorch-master\model_data\b5-1\best_epoch_weights.pth', help='model_path')
     #-------------------------------------------------------------------------#
     #   所需要区分的类的个数+1
     #-------------------------------------------------------------------------#

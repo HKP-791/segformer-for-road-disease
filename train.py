@@ -199,7 +199,7 @@ if __name__ == "__main__":
     #------------------------------------------------------------------#
     #   dataset_path  数据集路径
     #------------------------------------------------------------------#
-    parser.add_argument('--dataset_path',help='VOCdevkit Path', default='road_dataset', type=str)
+    parser.add_argument('--dataset_path',help='dataset Path', default='RDD_dataset', type=str)
     #------------------------------------------------------------------#
     #   建议选项：
     #   种类少（几类）时，设置为True
@@ -367,9 +367,9 @@ if __name__ == "__main__":
     #---------------------------#
     #   读取数据集对应的txt
     #---------------------------#
-    with open(os.path.join(dataset_path, "ImageSets/Segmentation/train.txt"),"r") as f:
+    with open(os.path.join('datasets', dataset_path, "list/train.txt"),"r") as f:
         train_lines = f.readlines()
-    with open(os.path.join(dataset_path, "ImageSets/Segmentation/val.txt"),"r") as f:
+    with open(os.path.join('datasets', dataset_path, "val/val.txt"),"r") as f:
         val_lines = f.readlines()
     num_train   = len(train_lines)
     num_val     = len(val_lines)
