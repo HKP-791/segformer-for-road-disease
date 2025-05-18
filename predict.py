@@ -72,27 +72,27 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------------#
     #   img_dir      储存测试照片文件的地址
     #-------------------------------------------------------------------------#
-    parser.add_argument('--img_dir', type=str, default='X:\segformer-pytorch-master\datasets\RDD_dataset\JPEGImages', help='img_dir') 
+    parser.add_argument('--img_dir', type=str, default='X:\segformer-pytorch-master\datasets\CrackTree\JPEGImages', help='img_dir') 
     #-------------------------------------------------------------------------#
     #   label_dir      储存掩码标签的地址
     #-------------------------------------------------------------------------#
-    parser.add_argument('--label_dir', type=str, default='X:\segformer-pytorch-master\datasets\RDD_dataset\SegmentationClass', help='label_dir')
+    parser.add_argument('--label_dir', type=str, default='X:\segformer-pytorch-master\datasets\CrackTree\SegmentationClass', help='label_dir')
     #-------------------------------------------------------------------------#
     #   test_output    输出测试结果的文件地址
     #-------------------------------------------------------------------------#
-    parser.add_argument('--test_output', type=str, default='X:/segformer-pytorch-master/pred_result/RDD2022', help='test_output')
+    parser.add_argument('--test_output', type=str, default=r'X:\segformer-pytorch-master\pred_result\cracktree', help='test_output')
     #-------------------------------------------------------------------------#
     #   list_path      储存文件索引内容的txt地址
     #-------------------------------------------------------------------------#
-    parser.add_argument('--list_path', type=str, default=r'X:\segformer-pytorch-master\datasets\RDD_dataset\list\val.txt', help='list_path')
+    parser.add_argument('--list_path', type=str, default=r'X:\segformer-pytorch-master\datasets\CrackTree\list\val.txt', help='list_path')
     #-------------------------------------------------------------------------#
     #   model_path指向model_data文件夹下的权值文件
     #-------------------------------------------------------------------------#
-    parser.add_argument('--model_path', type=str, default=r'X:\segformer-pytorch-master\model_data\b5-1\best_epoch_weights.pth', help='model_path')
+    parser.add_argument('--model_path', type=str, default=r'X:\segformer-pytorch-master\model_data\cracktree\b2\1\best_epoch_weights.pth', help='model_path')
     #-------------------------------------------------------------------------#
     #   所需要区分的类的个数+1
     #-------------------------------------------------------------------------#
-    parser.add_argument('--num_classes', type=int, default=4, help='num_classes')
+    parser.add_argument('--num_classes', type=int, default=2, help='num_classes')
     #-------------------------------------------------------------------------#
     #   所使用的的主干网络：
     #   b0、b1、b2、b3、b4、b5
@@ -126,7 +126,8 @@ if __name__ == '__main__':
     phi = args.phi
     mix_type = args.mix_type
 
-    name_classes = ['background', 'crack', 'pothole', 'patch']
+    # name_classes = ['background', 'crack', 'pothole', 'patch']
+    name_classes = ['background', 'crack']
     segformer = SegFormer_Segmentation(model_path=model_path, num_classes=num_classes, phi=phi, mix_type=mix_type)
 
     if mode == 'single_predict':
@@ -153,8 +154,8 @@ if __name__ == '__main__':
                 label = Image.open(label_path)
                 prediction = segformer.get_miou_png(image)
                 metric_i = []
-                for i in range(1, 4):
-                    prediction = erode_mask(prediction)
+                for i in range(1, num_classes):
+                    # prediction = erode_mask(prediction)
                     result = calculate_metric_percase(prediction, np.array(label), i)
                     if result is not None:
                         metric_i.append(result)
@@ -170,7 +171,7 @@ if __name__ == '__main__':
                 np.savez(output_file, **sample)
 
         metric_arr = np.array(metric_list)
-        for i in range(1, 4):
+        for i in range(1, num_classes):
             rows_with_label = metric_arr[metric_arr[:, -1] == i]
             mean_result = np.mean(rows_with_label, axis=0)
             print(f'Mean class {i} mean_dice {mean_result[0]} mean_hd95{mean_result[1]} iou {mean_result[2]} map@{mean_result[3]} {mean_result[4]} map@0.5:0.95 {mean_result[5]}')

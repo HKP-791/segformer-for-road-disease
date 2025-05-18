@@ -232,18 +232,22 @@ def erode_mask(predtion):
     #      [1, 1, 1, 1, 1],
     #      [1, 1, 1, 1, 1]], dtype=np.uint8)
     k = np.array(
-        [[0, 0, 1, 0, 0],
-         [0, 0, 1, 0, 0],
-         [1, 1, 1, 1, 1],
-         [0, 0, 1, 0, 0],
-         [0, 0, 1, 0, 0]], dtype=np.uint8)
+        [[0, 1, 0],
+         [1, 1, 0],
+         [0, 1, 0],], dtype=np.uint8)
+    # k = np.array(
+    #     [[0, 0, 1, 0, 0],
+    #      [0, 0, 1, 0, 0],
+    #      [1, 1, 1, 1, 1],
+    #      [0, 0, 1, 0, 0],
+    #      [0, 0, 1, 0, 0]], dtype=np.uint8)
     # k = np.array(
     #     [[1, 0, 0, 0, 1],
     #      [0, 1, 0, 1, 0],
     #      [0, 0, 1, 0, 0],
     #      [0, 1, 0, 1, 0],
     #      [1, 0, 0, 0, 1]], dtype=np.uint8)
-    erode_predition = cv2.erode(predtion.astype(np.float32), k, iterations=4)
+    erode_predition = cv2.erode(predtion.astype(np.float32), k, iterations=1)
     return erode_predition
 
 def test_single_volume(image, label, net, classes, multimask_output, patch_size=[256, 256], input_size=[224, 224],

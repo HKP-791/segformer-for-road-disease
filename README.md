@@ -17,8 +17,8 @@
 
 | Model | mean_dice | mean_HD95 | mean_IOU | mAP@0.5 | mAP@0.5:0.95 |
 |-|-|-|-|-|-|
-| Segformer_for_road_disease_b2 | 0.650 | 21.49 | 0.511 | 0.097 | 0.067 |
-| Segformer_for_road_disease_b5 | **0.692** | **10.814** | **0.658** | **0.322** | **0.271** |
+| Segformer_for_road_disease_b2 | 0.674 | 9.327 | 0.472 | 0.265 | 0.179 |
+| Segformer_for_road_disease_b5 | **0.769** | **3.702** | **00.601** | **0.457** | **0.366** |
 
 ## 2.使用说明
 
